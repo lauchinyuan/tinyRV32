@@ -57,11 +57,23 @@ module mycore
 	wire						ex_jump_flag_o		;
 	wire[`InstAddrBus]			ex_jump_addr_o		;
 	wire						ex_hold_flag_o		;
+	wire						ex_div_start_o		;
+	wire[`RegAddrBus]			ex_div_regw_addr_o	;
+	wire[`RegBus]				ex_dividend_o		;
+	wire[`RegBus]				ex_divisor_o		;
+	wire[2:0]					ex_div_op_o			;
+	
 		
 	// ctrl模块输出信号	
 	wire						ctrl_jump_flag_o	;
 	wire[`InstAddrBus]			ctrl_jump_addr_o	;
 	wire						ctrl_hold_flag_o	;
+	
+	// div模块输出信号
+	wire[`RegAddrBus]			div_reg_waddr_o		;
+	wire[`RegBus]				div_res_o			;
+	wire						div_ready_o			;
+	wire						div_busy_o			;
 	
 	
 	//my_core模块输出的指令地址
@@ -75,6 +87,7 @@ module mycore
 		.rst			(rst)				,
 		.jump_flag_i	(ctrl_jump_flag_o)	,
 		.jump_addr_i	(ctrl_jump_addr_o)	,
+		.hold_flag_i	(ctrl_hold_flag_o)	,
 
 		.pc_o		    (pc_reg_o)
 	);
@@ -194,6 +207,18 @@ module mycore
 
 		.reg_waddr_i	(idex_waddr_o)		,
 		.reg_wen_i		(idex_wen_o)		,
+		
+			//from div
+		.div_ready_i	(div_ready_o)		,
+		.div_res_i		(div_res_o)			,
+		.div_busy_i		(div_busy_o)		,
+		.div_reg_waddr_i(div_reg_waddr_o)	,
+
+		.div_start_o	(ex_div_start_o)	,
+		.div_reg_waddr_o(ex_div_regw_addr_o),
+		.div_op_o		(ex_div_op_o)		,
+		.div_dividend_o	(ex_dividend_o)		,
+		.div_divisor_o  (ex_divisor_o)		,
 
 		.reg_wdata_o 	(ex_wdata_o)		, 
 		.reg_waddr_o 	(ex_waddr_o)		,
@@ -213,7 +238,6 @@ module mycore
 	);
 	
 	//ctrl
-	
 	ctrl unit_ctrl
 	(
 		.rst			(rst)				,
@@ -225,4 +249,23 @@ module mycore
 		.jump_addr_o	(ctrl_jump_addr_o)	,
 		.hold_flag_o    (ctrl_hold_flag_o)
 	);
+	
+	//div
+	div unit_div
+(
+	.clk				(clk			),
+	.rst				(rst			),
+
+	.dividend_i			(ex_dividend_o	),
+	.divisor_i			(ex_divisor_o	),
+	.op_i				(ex_div_op_o	),
+	.reg_waddr_i		(ex_div_regw_addr_o),
+	.start_i			(ex_div_start_o	),
+
+	.reg_waddr_o		(div_reg_waddr_o),
+	.div_res_o			(div_res_o		),
+	.ready_o			(div_ready_o	),
+	.busy_o             (div_busy_o		)
+);
+	
 endmodule 
