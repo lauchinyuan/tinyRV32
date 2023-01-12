@@ -12,7 +12,6 @@ module ctrl
 );
 
 	always @ (*) begin
-		//输入-输出缓存?
 		jump_flag_o = jump_flag_i;
 		jump_addr_o = jump_addr_i;
 		hold_flag_o = hold_flag_i;

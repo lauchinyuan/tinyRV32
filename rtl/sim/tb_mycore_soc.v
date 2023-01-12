@@ -23,7 +23,7 @@ module tb_mycore_soc();
 	
 	initial begin
 		//写入指令内容
-		$readmemh("inst.txt",tb_mycore_soc.mycore_soc_inst.unit_rom.unit_ram_rom.unit_ram.memory);
+		$readmemh("rv32um-p-remu.txt",tb_mycore_soc.mycore_soc_inst.unit_rom.unit_ram_rom.unit_ram.memory);
 	end
 //rv32ui-p-sb.txt
  	initial begin
@@ -38,16 +38,19 @@ module tb_mycore_soc();
 		end  */ 
 
 		wait(x26);
-/* 		#200
+		#200
 		if (x27 == 32'b1) begin
 			$display("pass");
 			$display("step:%d",x3);
 		end else begin
 			$display("fail");
 			$display("step:%d",x3);
-		end */
+		end
 		
-		#5000
+		
+	end
+		
+/* 		#200
 		$display("x5 = %b", x5);
 		$display("x6 = %b", x6);
 		$display("x7 = %b", x7);
@@ -64,7 +67,7 @@ module tb_mycore_soc();
 
 		end
 		
-	end
+	end */
 	
 /* 	initial begin
 		while (1) begin

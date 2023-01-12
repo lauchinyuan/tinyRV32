@@ -16,6 +16,14 @@
 `define MemBus			31:0
 `define MemAddrBus		31:0
 
+//div
+`define DivStart		1'b1
+`define DivStop			1'b0
+`define DivBusy			1'b1
+`define DivIdle			1'b0
+`define DivReady		1'b1
+`define DivNotReady		1'b0
+
 
 //hold_flag
 `define HoldFlagBus		2:0
@@ -73,8 +81,9 @@
 `define INST_SW    		3'b010
 
 //R-type
-//注意，M-type没有实现
 `define INST_TYPE_R_M 	7'b0110011
+`define INST_R_7 		7'b0000000
+`define INST_SUB_SRA_7 	7'b0100000
 `define INST_ADD_SUB 	3'b000
 `define INST_SLL    	3'b001
 `define INST_SLT    	3'b010
@@ -84,6 +93,16 @@
 `define INST_OR     	3'b110
 `define INST_AND    	3'b111
 
+//M-type
+`define INST_TYPE_M_7	7'b0000001
+`define INST_MUL		3'b000
+`define INST_MULH		3'b001
+`define INST_MULHSU		3'b010
+`define INST_MULHU		3'b011
+`define INST_DIV		3'b100
+`define INST_DIVU		3'b101
+`define INST_REM		3'b110
+`define INST_REMU		3'b111
 
 `define INST_AND_7		7'b000000
 // M type inst
