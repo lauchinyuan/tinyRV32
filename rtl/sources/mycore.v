@@ -35,6 +35,11 @@ module mycore
 	wire[`RegBus]				id_rdata2_o			;
 	wire						id_wen_o			;
 	wire[`RegAddrBus]			id_waddr_o			;
+	wire[`CSRAddrBus]			id_csr_raddr_o		;
+	wire[`RegBus]				id_csr_rdata_o		;
+	wire						id_csr_wen_o		;
+	wire[`CSRAddrBus]			id_csr_waddr_o		;
+
 	
 	// id_ex模块输出信号
 	wire[`RegBus]				idex_op1_o			;
@@ -45,6 +50,9 @@ module mycore
 	wire[`RegBus]				idex_rdata2_o		;
 	wire						idex_wen_o			;
 	wire[`RegAddrBus]			idex_waddr_o		;	
+	wire[`RegBus]				idex_csr_rdata_o	;
+	wire[`CSRAddrBus]			idex_csr_waddr_o	;
+	wire						idex_csr_wen_o		;
 	
 	// regs模块输出信号
 	wire[`RegBus]				regs_rdata1_o		;
@@ -62,6 +70,9 @@ module mycore
 	wire[`RegBus]				ex_dividend_o		;
 	wire[`RegBus]				ex_divisor_o		;
 	wire[2:0]					ex_div_op_o			;
+	wire[`CSRAddrBus]			ex_csr_waddr_o		;
+	wire[`RegBus]				ex_csr_wdata_o		;
+	wire						ex_csr_wen_o		;
 	
 		
 	// ctrl模块输出信号	
@@ -75,6 +86,10 @@ module mycore
 	wire						div_ready_o			;
 	wire						div_busy_o			;
 	
+	// csr_reg模块输出信号
+	wire[`RegBus]				csr_rdata_o			;
+	wire						csr_int_en_o		;
+		
 	
 	//my_core模块输出的指令地址
 	assign inst_addr_o = pc_reg_o					;
@@ -140,6 +155,13 @@ module mycore
 		.reg1_rdata_o	(id_rdata1_o)		, //输出读取的寄存器数据
 		.reg2_rdata_o   (id_rdata2_o)		,
 		
+		//csr
+		.csr_rdata_i	(csr_rdata_o)		,
+		.csr_raddr_o	(id_csr_raddr_o)	,
+		.csr_wen_o		(id_csr_wen_o)		,
+		.csr_waddr_o	(id_csr_waddr_o)	,
+		.csr_rdata_o 	(id_csr_rdata_o)	,
+		
 		.mem_ren_o		(id_mem_ren_o		),
 		.mem_raddr_o	(id_mem_raddr_o		)
 		
@@ -180,6 +202,15 @@ module mycore
 		.op2_i			(id_op2_o)			,
 		
 		.hold_flag_i	(ctrl_hold_flag_o)	,
+		
+
+		.csr_waddr_i	(id_csr_waddr_o)	,
+		.csr_wen_i		(id_csr_wen_o)		,
+		.csr_rdata_i	(id_csr_rdata_o)	,
+
+		.csr_waddr_o	(idex_csr_waddr_o)	,
+		.csr_wen_o		(idex_csr_wen_o)	,	
+		.csr_rdata_o	(idex_csr_rdata_o)	,
 
 		.inst_o			(idex_inst_o)		,
 		.inst_addr_o	(idex_inst_addr_o)	,
@@ -208,11 +239,20 @@ module mycore
 		.reg_waddr_i	(idex_waddr_o)		,
 		.reg_wen_i		(idex_wen_o)		,
 		
-			//from div
+		//from div
 		.div_ready_i	(div_ready_o)		,
 		.div_res_i		(div_res_o)			,
 		.div_busy_i		(div_busy_o)		,
 		.div_reg_waddr_i(div_reg_waddr_o)	,
+		
+		//csr
+		.csr_waddr_i	(idex_csr_waddr_o)	,
+		.csr_rdata_i	(idex_csr_rdata_o)	,
+		.csr_wen_i		(idex_csr_wen_o)	,
+		
+		.csr_wdata_o	(ex_csr_wdata_o)  	,
+		.csr_wen_o		(ex_csr_wen_o)		,
+		.csr_waddr_o    (ex_csr_waddr_o)	,
 
 		.div_start_o	(ex_div_start_o)	,
 		.div_reg_waddr_o(ex_div_regw_addr_o),
@@ -266,6 +306,20 @@ module mycore
 	.div_res_o			(div_res_o		),
 	.ready_o			(div_ready_o	),
 	.busy_o             (div_busy_o		)
+);
+
+	csr_reg unit_csr
+(
+	.clk				(clk),
+	.rst				(rst),
+
+	.csr_raddr_i		(id_csr_raddr_o),
+	.csr_waddr_i		(ex_csr_waddr_o),
+	.csr_wen_i			(ex_csr_wen_o),
+	.csr_wdata_i		(ex_csr_wdata_o),
+
+	.csr_rdata_o		(csr_rdata_o)	,
+	.global_int_en_o    (csr_int_en_o)
 );
 	
 endmodule 

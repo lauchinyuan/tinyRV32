@@ -12,6 +12,11 @@ module tb_mycore_soc();
 	wire[`RegBus]	x8 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[8];
 	wire[`RegBus]	x5 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[5];
 	wire[`RegBus]	x26 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[26];
+	wire[`RegBus]	x9 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[9];
+	wire[`RegBus]	x10 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[10];
+	wire[`RegBus]	x11 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[11];
+	wire[`RegBus]	x12 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[12];
+	wire[`RegBus]	x13 = tb_mycore_soc.mycore_soc_inst.core.unit_regs.regs[13];
 	initial begin
 		clk = 1'b1;
 		rst <= 1'b0;
@@ -23,7 +28,7 @@ module tb_mycore_soc();
 	
 	initial begin
 		//写入指令内容
-		$readmemh("rv32um-p-remu.txt",tb_mycore_soc.mycore_soc_inst.unit_rom.unit_ram_rom.unit_ram.memory);
+		$readmemh("inst_csrrci.txt",tb_mycore_soc.mycore_soc_inst.unit_rom.unit_ram_rom.unit_ram.memory);
 	end
 //rv32ui-p-sb.txt
  	initial begin
@@ -39,13 +44,26 @@ module tb_mycore_soc();
 
 		wait(x26);
 		#200
-		if (x27 == 32'b1) begin
+		$display("x5 = %b",x5);
+		$display("x12 = %b",x12);
+		$display("x7 = %b",x7);
+		$display("x13 = %b", x13);
+		if(x13 == (x5 & ~32'b00111) && (x12 == x5)) begin
+//		if(x12 == 32'b00101) begin
+			$display("pass");
+		end else begin
+			$display("fail");
+		end
+		
+		
+		
+/* 		if (x27 == 32'b1) begin
 			$display("pass");
 			$display("step:%d",x3);
 		end else begin
 			$display("fail");
 			$display("step:%d",x3);
-		end
+		end */
 		
 		
 	end

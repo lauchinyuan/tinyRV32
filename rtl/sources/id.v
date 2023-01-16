@@ -12,9 +12,13 @@ module id
 	input wire [`RegBus]		reg1_rdata_i,
 	input wire [`RegBus]		reg2_rdata_i,
 	
+	//从csr中读取的数据
+	input wire[`RegBus]			csr_rdata_i	,
+	
 	//to regs
 	output reg [`RegAddrBus]	reg1_raddr_o,
 	output reg [`RegAddrBus]	reg2_raddr_o,
+
 	
 	//to ex
 	output reg [`RegBus]		op1_o, //操作数1
@@ -31,6 +35,13 @@ module id
 	output reg	[`RegBus]		reg1_rdata_o,  //输出读取的寄存器数据
 	output reg 	[`RegBus]		reg2_rdata_o,
 	
+	//csr
+	output reg[`CSRAddrBus]		csr_raddr_o	,
+	output reg					csr_wen_o	,
+	output reg[`CSRAddrBus]		csr_waddr_o	,
+	output reg[`RegBus]			csr_rdata_o ,
+	
+	
 	output reg					mem_ren_o	,
 	output reg[`MemAddrBus]		mem_raddr_o	
 	
@@ -43,18 +54,24 @@ module id
 	wire[4:0] rs2 = inst_i[24:20];
 	wire[6:0] funct7 = inst_i[31:25];
 	
+	
 	//做测试的时候应该是一条一条指令测试
 	always @ (*) begin
 		inst_o = inst_i;			//输出的指令
 		inst_addr_o = inst_addr_i;	//输出的指令地址
 		
-		reg1_rdata_o = reg1_rdata_i; //输出到下级有何用？
+		reg1_rdata_o = reg1_rdata_i; 
 		reg2_rdata_o = reg2_rdata_i;
+		csr_rdata_o = csr_rdata_i;
+		
 		
 		op1_o = `ZeroWord;
 		op2_o = `ZeroWord;
 		mem_ren_o = `ReadDisable;   //默认不读取数据存储器，只有L型指令需要读取
 		mem_raddr_o = `ZeroWord	;
+		csr_wen_o = `WriteDisable;
+		csr_raddr_o = `ZeroWord;
+		csr_waddr_o = `ZeroWord;
 		
 		case(opcode)
 			`INST_TYPE_I: begin
@@ -242,6 +259,40 @@ module id
 				reg_wen_o 	 = `WriteEnable ;
 				op1_o		 = {inst_i[31:12], 12'b0};
 				op2_o		 = `ZeroWord	;
+			end
+			
+			`INST_CSR: begin
+				case(funct3) 
+					`INST_CSRRW, `INST_CSRRS, `INST_CSRRC: begin
+						reg1_raddr_o = rs1;
+						reg2_raddr_o = `ZeroReg;
+						reg_w_addr_o = rd;
+						reg_wen_o	 = `WriteEnable;
+						csr_wen_o = `WriteEnable;
+						csr_raddr_o = {20'b0 ,inst_i[31:20]};
+						csr_waddr_o = {20'b0 ,inst_i[31:20]};
+					end
+					
+					`INST_CSRRWI, `INST_CSRRSI, `INST_CSRRCI: begin
+						reg1_raddr_o = `ZeroReg;
+						reg2_raddr_o = `ZeroReg;
+						reg_w_addr_o = rd;
+						reg_wen_o = `WriteEnable;
+						csr_wen_o = `WriteEnable;
+						csr_raddr_o = {20'b0 ,inst_i[31:20]};
+						csr_waddr_o = {20'b0 ,inst_i[31:20]};
+					end
+					
+					default: begin
+						reg1_raddr_o = `ZeroReg;
+						reg2_raddr_o = `ZeroReg;
+						reg_w_addr_o = `ZeroReg;
+						reg_wen_o = `WriteDisable;
+						csr_wen_o = `WriteDisable;
+						csr_raddr_o = `ZeroWord;
+						csr_waddr_o = `ZeroWord;						
+					end
+				endcase
 			end
 			
 			
