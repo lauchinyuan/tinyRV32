@@ -22,6 +22,14 @@ module ex
 	input wire					div_busy_i		,
 	input wire[`RegAddrBus]		div_reg_waddr_i	,
 	
+	//csr
+	input wire[`CSRAddrBus]		csr_waddr_i		,
+	input wire[`RegBus]			csr_rdata_i		,
+	input wire					csr_wen_i		,
+	
+	output reg[`RegBus]			csr_wdata_o		,
+	output reg					csr_wen_o		,
+	output reg[`CSRAddrBus]		csr_waddr_o		,
 	//to div
 	output reg					div_start_o		,
 	output reg[`RegAddrBus]		div_reg_waddr_o	,
@@ -234,6 +242,9 @@ module ex
 		reg_wen			= reg_wen_i		;
 		mem_wen_o		= 4'b0000		;
 		mem_waddr_o		= `ZeroWord		;
+		csr_wdata_o		= `ZeroWord		;
+		csr_wen_o 		= csr_wen_i		;
+		csr_waddr_o  	= csr_waddr_i	;
 		case(opcode)
 			`INST_TYPE_I: begin
 				case(funct3)
@@ -632,9 +643,9 @@ module ex
 			
 			`INST_AUIPC: begin
 				reg_wdata = op1_i + inst_addr_i	;
-				jump_flag = `JumpDisable			;
-				jump_addr = `ZeroWord				;
-				hold_flag = `HoldDisable			;
+				jump_flag = `JumpDisable		;
+				jump_addr = `ZeroWord			;
+				hold_flag = `HoldDisable		;
 			end
 			
 			`INST_LUI: begin
@@ -642,6 +653,57 @@ module ex
 				jump_flag = `JumpDisable	;
 				jump_addr = `ZeroWord		;
 				hold_flag = `HoldDisable	;
+			end
+			
+			`INST_CSR: begin
+				case(funct3)
+					`INST_CSRRW: begin
+						reg_wdata = csr_rdata_i;
+						csr_wdata_o = reg1_rdata_i;
+						jump_flag = `JumpDisable;
+						hold_flag = `HoldDisable;
+						jump_addr = `ZeroWord	;
+					end
+					`INST_CSRRS: begin
+						reg_wdata = csr_rdata_i;
+						csr_wdata_o = reg1_rdata_i | csr_rdata_i;
+						jump_flag = `JumpDisable;
+						hold_flag = `HoldDisable;
+						jump_addr = `ZeroWord	;
+					end					
+
+					`INST_CSRRC: begin
+						reg_wdata = csr_rdata_i;
+						csr_wdata_o = (~reg1_rdata_i) & csr_rdata_i;
+						jump_flag = `JumpDisable;
+						hold_flag = `HoldDisable;
+						jump_addr = `ZeroWord	;
+					end		
+
+					`INST_CSRRWI: begin
+						reg_wdata = csr_rdata_i;
+						csr_wdata_o = {27'b0, inst_i[19:15]};
+						jump_flag = `JumpDisable;
+						hold_flag = `HoldDisable;
+						jump_addr = `ZeroWord	;
+					end
+					`INST_CSRRSI: begin
+						reg_wdata = csr_rdata_i;
+						csr_wdata_o = {27'b0, inst_i[19:15]} | csr_rdata_i;
+						jump_flag = `JumpDisable;
+						hold_flag = `HoldDisable;
+						jump_addr = `ZeroWord	;
+					end					
+
+					`INST_CSRRCI: begin
+						reg_wdata = csr_rdata_i;
+						csr_wdata_o = ~{27'b0, inst_i[19:15]} & csr_rdata_i;
+						jump_flag = `JumpDisable;
+						hold_flag = `HoldDisable;
+						jump_addr = `ZeroWord	;
+					end							
+				endcase
+			
 			end
 			
 			default: begin

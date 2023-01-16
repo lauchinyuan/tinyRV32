@@ -12,7 +12,7 @@ module if_id
 	
 	input 	wire				hold_flag_i	,
 	
-	//output
+	// output
 	output	wire[`InstAddrBus]	inst_addr_o	,
 	output	wire[`InstBus]		inst_o		
 );  
@@ -54,6 +54,7 @@ set_dff
 	.data_in	(inst_addr_i),
 	.data_out	(inst_addr_o)
 );
+
 
 
 endmodule  //endmodule of if_id
